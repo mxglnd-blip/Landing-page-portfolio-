@@ -81,9 +81,9 @@
          inside the orb itself (gold -> orange -> hot pink -> violet in
          the big one, lime -> green -> teal in another, pink -> plum in a
          third), and every orb feathers out to fully transparent at its
-         rim, like defocused colored light. A moderate blur keeps the
-         masses soft without dissolving them into fog. Where orbs push
-         into each other, mix-blend-mode: multiply mixes their colors
+         rim. A light blur (12px) softens the rim while keeping each
+         orb's shape readable. Where orbs push into each other,
+         mix-blend-mode: multiply mixes their colors
          into NEW colors, like paint. Shifted at different depths by
          scroll + pointer parallax (see the lava script at the
          bottom). ---- */
@@ -100,7 +100,7 @@
          through their backdrop filters at full strength. */
       .lava { position: fixed; inset: -10vmax; z-index: 0; overflow: hidden; pointer-events: none; }
       .blob-wrap { position: absolute; will-change: transform; }
-      .blob { border-radius: 50%; filter: blur(30px) saturate(var(--blob-sat, 1.13)); mix-blend-mode: multiply; will-change: transform, translate, rotate; }
+      .blob { border-radius: 50%; filter: blur(12px) saturate(var(--blob-sat, 1.13)); mix-blend-mode: multiply; will-change: transform, translate, rotate; }
       /* the WebGL lava (see the script) replaces the CSS orbs when it
          starts; 100lvh keeps it from resizing as a phone's address
          bar slides in and out */
@@ -2633,10 +2633,10 @@
            and bottom like cooling wax), sway sideways, swell and
            shrink, and stretch tall while they travel fast. The
            cursor gently pushes the wax away; scrolling shifts the
-           blobs at different depths. It renders at half the screen's
-           resolution (in CSS pixels, whatever the device density) —
-           the field is soft, so the upscale is invisible — which keeps
-           it to a sliver of GPU time. If
+           blobs at different depths. Each blob has a defined surface
+           with a few pixels of soft edge, a faint outer glow and a
+           deeper rim, so the shapes read clearly. It renders one
+           canvas pixel per CSS pixel — one cheap pass. If
            WebGL is unavailable or the context is lost, the CSS orbs
            (.lava) take over. Reduced motion: one still frame. */
         var LAVA_COLORS = {
@@ -2663,14 +2663,20 @@
           try { gl = cv.getContext("webgl", { alpha: false, antialias: false, depth: false, stencil: false, powerPreference: "low-power" }); } catch (e) {}
           if (!gl) return false;
           var VS = "attribute vec2 a; varying vec2 v; void main() { v = a * 0.5 + 0.5; gl_Position = vec4(a, 0.0, 1.0); }";
+          /* fwidth() — how much the field changes per screen pixel —
+             lets the wax edge be a fixed few pixels wide whatever the
+             blob's size; it needs this (near-universal) extension.
+             Without it, a narrow fixed band in field units stands in. */
+          var deriv = !!gl.getExtension("OES_standard_derivatives");
           var FS = [
+            deriv ? "#extension GL_OES_standard_derivatives : enable\n#define DERIV 1" : "",
             "#ifdef GL_FRAGMENT_PRECISION_HIGH",
             "precision highp float;",
             "#else",
             "precision mediump float;",
             "#endif",
             "varying vec2 v;",
-            "uniform vec2 uRes; uniform vec3 uBg; uniform float uStr;",
+            "uniform vec2 uRes; uniform vec3 uBg; uniform float uStr; uniform float uEdge;",
             "uniform vec4 uB[7]; uniform vec3 uIn[7]; uniform vec3 uOut[7];",
             "void main() {",
             "  vec2 p = vec2(v.x * uRes.x / uRes.y, v.y);",
@@ -2684,7 +2690,22 @@
             "    float w = f * sqrt(f); acc += c * w; wsum += w;",
             "  }",
             "  vec3 col = acc / max(wsum, 1e-6);",
-            "  float a = smoothstep(0.3, 0.8, field) * 0.16 + smoothstep(0.8, 1.15, field) * 0.66 + smoothstep(1.15, 7.0, field) * 0.18;",
+            /* body: the wax surface sits at field = 1. Its edge spans
+               uEdge screen pixels, so every blob reads as a shape */
+            "#ifdef DERIV",
+            "  float fw = max(fwidth(field), 1e-4) * uEdge;",
+            "  float body = smoothstep(1.0 - fw, 1.0 + fw, field);",
+            "#else",
+            "  float body = smoothstep(0.93, 1.07, field);",
+            "#endif",
+            /* a faint glow just outside, like light through the glass,
+               and a deeper rim just inside the edge that outlines the
+               shape. No extra "core" darkening: it fought the lighter
+               inner color and drew a bright ring partway out, so the
+               shading now runs one way — lit middle, defined rim. */
+            "  float glow = smoothstep(0.6, 1.0, field) * (1.0 - body) * 0.10;",
+            "  float rim = body * (1.0 - smoothstep(1.0, 1.8, field)) * 0.12;",
+            "  float a = glow + body * 0.72 + rim;",
             "  vec3 o = uBg * mix(vec3(1.0), col, a * uStr);",
             "  float n = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);",
             "  gl_FragColor = vec4(o + (n - 0.5) * 1.5 / 255.0, 1.0);",
@@ -2706,7 +2727,7 @@
           gl.enableVertexAttribArray(aLoc);
           gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
           var U = {};
-          ["uRes", "uBg", "uStr", "uB", "uIn", "uOut"].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+          ["uRes", "uBg", "uStr", "uEdge", "uB", "uIn", "uOut"].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
 
           var scheme = document.documentElement.getAttribute("data-scheme") || "vivid";
           var pal = LAVA_COLORS[scheme] || LAVA_COLORS.vivid;
@@ -2714,13 +2735,21 @@
           pal.forEach(function (c) { for (var k = 0; k < 3; k++) { inC.push(c[0][k] / 255); outC.push(c[1][k] / 255); } });
           gl.uniform3fv(U.uIn, inC); gl.uniform3fv(U.uOut, outC);
           gl.uniform1f(U.uStr, LAVA_STRENGTH[scheme] || 0.6);
+          /* edge softness in canvas pixels either side of the surface
+             (≈ 3 screen pixels after the upscale): a defined but still
+             soft-edged shape; 1 = a hard cutout, 6+ = hazy again */
+          gl.uniform1f(U.uEdge, 2.0);
           var bgHex = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
           var bg = /^#[0-9a-f]{6}$/i.test(bgHex) ? [1, 3, 5].map(function (i) { return parseInt(bgHex.substr(i, 2), 16) / 255; }) : [0.93, 0.95, 0.91];
           gl.uniform3fv(U.uBg, bg);
 
           var W = 0, H = 0, asp = 1;
           function size() {
-            var w = Math.max(64, Math.round(cv.clientWidth / 2)), h = Math.max(64, Math.round(cv.clientHeight / 2));
+            /* 60% of the CSS-pixel size: the edge is drawn in canvas
+               pixels (fwidth), so after the upscale it is still only a
+               few pixels soft — while the GPU shades ~1/3 the pixels
+               of a full-size canvas (full size cost ~3.6x more) */
+            var w = Math.max(64, Math.round(cv.clientWidth * 0.6)), h = Math.max(64, Math.round(cv.clientHeight * 0.6));
             if (w === W && h === H) return;
             W = cv.width = w; H = cv.height = h; asp = w / h;
             gl.viewport(0, 0, w, h);
@@ -2750,7 +2779,7 @@
             var kS = 1 - Math.pow(0.94, dt * 60), kP = 1 - Math.pow(0.92, dt * 60);
             cScroll += (tScroll - cScroll) * kS;
             /* narrow (phone) screens get smaller wax so it doesn't flood the width */
-            var rScale = 0.8 * (0.45 + 0.55 * Math.min(asp, 1.4) / 1.4);
+            var rScale = 0.7 * (0.45 + 0.55 * Math.min(asp, 1.4) / 1.4);
             for (var i = 0; i < 7; i++) {
               var b = LAVA_BLOBS[i], w = 2 * Math.PI / b[2];
               /* rise and sink: a full trip bottom → top → bottom, slowing
