@@ -390,6 +390,20 @@
       .bd-row { display: grid; gap: 6px; font-size: 0.92rem; }
       .bd-row + .bd-row { border-top: 1px solid var(--line); padding-top: 12px; }
       .bd-row .bd-head { color: var(--ink-2); }
+      /* each concept opens with its pen sketch -> finished logo; either
+         tile opens that concept's page of the gallery */
+      .bd-art { display: flex; align-items: center; gap: 12px; margin: 2px 0 4px; }
+      .bd-art button { all: unset; cursor: zoom-in; display: grid; justify-items: center; gap: 6px; border-radius: 14px; }
+      .bd-art button:focus-visible { outline: 3px solid var(--purple-bright); outline-offset: 3px; }
+      .bd-art img {
+        width: 104px; height: 104px; border-radius: 14px; background: #fff; border: 1px solid var(--line);
+        box-shadow: 0 2px 6px rgba(20, 35, 25, 0.12), 0 10px 22px -10px rgba(20, 35, 25, 0.3);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+      .bd-art button:hover img { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(20, 35, 25, 0.14), 0 16px 28px -10px rgba(20, 35, 25, 0.36); }
+      .bd-art button span { font-size: 0.78rem; font-weight: 700; color: var(--ink-3); letter-spacing: 0.02em; }
+      .bd-to { color: var(--purple); font-size: 1.3rem; font-weight: 700; margin-bottom: 22px; }
+      @media (max-width: 380px) { .bd-art img { width: 92px; height: 92px; } }
       .bd-row .bd-head b { color: var(--ink); font-size: 1rem; }
       .bd-row p { color: var(--ink-2); }
 
@@ -1502,6 +1516,11 @@
                 <div class="bd">
                   <h4 data-i18n="bd.concepts">Each concept, broken down</h4>
                   <div class="bd-row">
+                    <div class="bd-art">
+                      <button type="button" data-open-gallery="logos" data-slot="1" aria-haspopup="dialog"><img src="images/sketch-brinco.jpg" width="170" height="170" loading="lazy" decoding="async" alt="Brinco — original pen sketch" /><span data-i18n="bd.sketch">Pen sketch</span></button>
+                      <span class="bd-to" aria-hidden="true">→</span>
+                      <button type="button" data-open-gallery="logos" data-slot="1" aria-haspopup="dialog"><img src="images/mark-brinco.jpg" width="170" height="170" loading="lazy" decoding="async" alt="Brinco — finished logo" /><span data-i18n="bd.mark">Finished logo</span></button>
+                    </div>
                     <p class="bd-head"><b>Brinco</b> · <span data-i18n="cc.brinco">Sticker / mascot</span> · <span data-i18n="lb.type">Type</span>: <span data-i18n="type.brinco">Fredoka 600</span></p>
                     <div class="chip-row">
                       <span class="chip"><i style="background:#F7B538"></i><span data-i18n="pal.brinco.1">Butter</span> #F7B538</span>
@@ -1512,6 +1531,11 @@
                     <p data-i18n="cn.brinco">Built from four ellipses on a circle; the egg's zigzag band comes straight from the sketch. A white keyline means it works as a sticker or on kids' packaging.</p>
                   </div>
                   <div class="bd-row">
+                    <div class="bd-art">
+                      <button type="button" data-open-gallery="logos" data-slot="2" aria-haspopup="dialog"><img src="images/sketch-semblanza.jpg" width="170" height="170" loading="lazy" decoding="async" alt="Semblanza — original pen sketch" /><span data-i18n="bd.sketch">Pen sketch</span></button>
+                      <span class="bd-to" aria-hidden="true">→</span>
+                      <button type="button" data-open-gallery="logos" data-slot="2" aria-haspopup="dialog"><img src="images/mark-semblanza.jpg" width="170" height="170" loading="lazy" decoding="async" alt="Semblanza — finished logo" /><span data-i18n="bd.mark">Finished logo</span></button>
+                    </div>
                     <p class="bd-head"><b>Semblanza</b> · <span data-i18n="cc.semblanza">Minimal monoline</span> · <span data-i18n="lb.type">Type</span>: <span data-i18n="type.semblanza">Instrument Serif, tracked</span></p>
                     <div class="chip-row">
                       <span class="chip"><i style="background:#111111"></i><span data-i18n="pal.semblanza.1">Ink</span> #111111</span>
@@ -1521,6 +1545,11 @@
                     <p data-i18n="cn.semblanza">One stroke weight with square caps, set inside a square like a photo frame. The single red square is a camera's recording light.</p>
                   </div>
                   <div class="bd-row">
+                    <div class="bd-art">
+                      <button type="button" data-open-gallery="logos" data-slot="3" aria-haspopup="dialog"><img src="images/sketch-polvo.jpg" width="170" height="170" loading="lazy" decoding="async" alt="Polvo Coffee Co. — original pen sketch" /><span data-i18n="bd.sketch">Pen sketch</span></button>
+                      <span class="bd-to" aria-hidden="true">→</span>
+                      <button type="button" data-open-gallery="logos" data-slot="3" aria-haspopup="dialog"><img src="images/mark-polvo.jpg" width="170" height="170" loading="lazy" decoding="async" alt="Polvo Coffee Co. — finished logo" /><span data-i18n="bd.mark">Finished logo</span></button>
+                    </div>
                     <p class="bd-head"><b>Polvo Coffee Co.</b> · <span data-i18n="cc.polvo">Vintage emblem</span> · <span data-i18n="lb.type">Type</span>: <span data-i18n="type.polvo">Fraunces 700</span></p>
                     <div class="chip-row">
                       <span class="chip"><i style="background:#2E1F17"></i><span data-i18n="pal.polvo.1">Roast</span> #2E1F17</span>
@@ -1530,6 +1559,11 @@
                     <p data-i18n="cn.polvo">A solid head profile that breaks apart into coffee grounds, set as a circular badge with the name on the arc — like a roaster's stamp.</p>
                   </div>
                   <div class="bd-row">
+                    <div class="bd-art">
+                      <button type="button" data-open-gallery="logos" data-slot="4" aria-haspopup="dialog"><img src="images/sketch-trazo.jpg" width="170" height="170" loading="lazy" decoding="async" alt="Trazo Studio — original pen sketch" /><span data-i18n="bd.sketch">Pen sketch</span></button>
+                      <span class="bd-to" aria-hidden="true">→</span>
+                      <button type="button" data-open-gallery="logos" data-slot="4" aria-haspopup="dialog"><img src="images/mark-trazo.jpg" width="170" height="170" loading="lazy" decoding="async" alt="Trazo Studio — finished logo" /><span data-i18n="bd.mark">Finished logo</span></button>
+                    </div>
                     <p class="bd-head"><b>Trazo Studio</b> · <span data-i18n="cc.trazo">Monogram</span> · <span data-i18n="lb.type">Type</span>: <span data-i18n="type.trazo">Bricolage Grotesque 500</span></p>
                     <div class="chip-row">
                       <span class="chip"><i style="background:#0F4C5C"></i><span data-i18n="pal.trazo.1">Deep Teal</span> #0F4C5C</span>
@@ -1539,6 +1573,11 @@
                     <p data-i18n="cn.trazo">One unbroken line: it draws a U, climbs into a nose-and-lip profile, then lands as an L. The lime dot is the eye. Made to live as an app-icon tile.</p>
                   </div>
                   <div class="bd-row">
+                    <div class="bd-art">
+                      <button type="button" data-open-gallery="logos" data-slot="5" aria-haspopup="dialog"><img src="images/sketch-pupila.jpg" width="170" height="170" loading="lazy" decoding="async" alt="Pupila Eyewear — original pen sketch" /><span data-i18n="bd.sketch">Pen sketch</span></button>
+                      <span class="bd-to" aria-hidden="true">→</span>
+                      <button type="button" data-open-gallery="logos" data-slot="5" aria-haspopup="dialog"><img src="images/mark-pupila.jpg" width="170" height="170" loading="lazy" decoding="async" alt="Pupila Eyewear — finished logo" /><span data-i18n="bd.mark">Finished logo</span></button>
+                    </div>
                     <p class="bd-head"><b>Pupila Eyewear</b> · <span data-i18n="cc.pupila">Bold pop</span> · <span data-i18n="lb.type">Type</span>: <span data-i18n="type.pupila">Bricolage Grotesque 800</span></p>
                     <div class="chip-row">
                       <span class="chip"><i style="background:#FF6B57"></i><span data-i18n="pal.pupila.1">Coral</span> #FF6B57</span>
@@ -1824,7 +1863,7 @@
             "w3.tag": "Brand identity · Financial startup",
             "w3.p": "A complete logo and brand guide for a financial services startup concept. It started as my pen sketch of a laughing, mustached character in a fez with crossed arms. I reduced the character to one continuous line — the crossed arms and posture stay, but the body becomes a genie rising from a lamp — then paired it with a hand-lettered script wordmark. The finished work was delivered as vector files with a brand guide covering the logo versions, clear space, minimum sizes, color, type and what not to do with it, so printers, sign shops and future designers can use the brand correctly without guesswork.",
             "gc.1": "Lamp Teal", "gc.2": "Night Navy", "gc.3": "Genie Red", "gc.4": "Smoke Purple",
-            "bd.title": "The brand guide, broken down", "bd.concepts": "Each concept, broken down",
+            "bd.title": "The brand guide, broken down", "bd.concepts": "Each concept, broken down", "bd.sketch": "Pen sketch", "bd.mark": "Finished logo",
             "bd.versions": "Logo versions", "bd.space": "Clear space & minimum size", "bd.grad": "Gradients", "bd.type": "Typography", "bd.misuse": "Misuse rules",
             "bd.finc.versionsT": "Primary in full color, the icon on its own, reversed white on Night Navy, and one color for stamps and engraving.",
             "bd.finc.spaceT": "Keep at least half the icon's width empty on every side. Minimum size: full logo 1 in wide in print (96 px on screen); icon 0.4 in (32 px). Below that, use the icon alone.",
@@ -1995,7 +2034,7 @@
             "w3.tag": "Identidad de marca · Startup financiera",
             "w3.p": "Un logo completo y su guía de marca para un concepto de startup de servicios financieros. Empezó como mi boceto a pluma de un personaje sonriente, con bigote y fez, de brazos cruzados. Reduje el personaje a una sola línea continua — los brazos cruzados y la postura se quedan, pero el cuerpo se vuelve un genio saliendo de una lámpara — y lo acompañé con un wordmark en caligrafía dibujada a mano. El trabajo final se entregó en archivos vectoriales con una guía de marca que cubre las versiones del logo, el espacio libre, los tamaños mínimos, el color, la tipografía y lo que no se debe hacer con él, para que imprentas, rotulistas y futuros diseñadores usen la marca correctamente y sin adivinar.",
             "gc.1": "Verde Lámpara", "gc.2": "Azul Noche", "gc.3": "Rojo Genio", "gc.4": "Morado Humo",
-            "bd.title": "La guía de marca, desglosada", "bd.concepts": "Cada concepto, desglosado",
+            "bd.title": "La guía de marca, desglosada", "bd.concepts": "Cada concepto, desglosado", "bd.sketch": "Boceto a pluma", "bd.mark": "Logo final",
             "bd.versions": "Versiones del logo", "bd.space": "Espacio libre y tamaño mínimo", "bd.grad": "Degradados", "bd.type": "Tipografía", "bd.misuse": "Lo que no se debe hacer",
             "bd.finc.versionsT": "Principal a todo color, el ícono solo, invertido en blanco sobre Azul Noche, y una sola tinta para sellos y grabados.",
             "bd.finc.spaceT": "Deja libre al menos la mitad del ancho del ícono en cada lado. Tamaño mínimo: logo completo 1 pulg. de ancho en impresión (96 px en pantalla); ícono 0.4 pulg. (32 px). Por debajo de eso, usa solo el ícono.",
@@ -3571,6 +3610,12 @@
         for (var i = 0; i < triggers.length; i++) {
           triggers[i].addEventListener("click", function () {
             openGallery(this.getAttribute("data-gallery"), parseInt(this.getAttribute("data-slot"), 10));
+          });
+        }
+        var galleryOpeners = document.querySelectorAll("[data-open-gallery]");
+        for (var go = 0; go < galleryOpeners.length; go++) {
+          galleryOpeners[go].addEventListener("click", function () {
+            openGallery(this.getAttribute("data-open-gallery"), parseInt(this.getAttribute("data-slot"), 10));
           });
         }
         lbPrev.addEventListener("click", function () { stepLb(-1); });
