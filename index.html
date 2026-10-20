@@ -287,21 +287,35 @@
         .blob { animation: none; }
         .btn-next::after { animation: none; }
         .view.active { animation: none; }
-        .panel, .quiz-teaser, .svc, .work-card, .built-item, .network-note, .score-shell, .contact, .btn, .dock a, .dock-thumb, .menu, .menu-thumb, .lang-thumb, .scheme-thumb, .lightbox, #lbImg, .lava, body { transition: none; }
+        .panel, .quiz-teaser, .svc, .work-card, .built-item, .network-note, .score-shell, .contact, .btn, .dock a, .dock-thumb, .menu, .menu-thumb, .lang-thumb, .scheme-thumb, .lightbox, #lbImg, .lava, body, .topbar-in, .brand img { transition: none; }
         html { scroll-behavior: auto; }
       }
 
       /* ---- top bar ---- */
+      /* fixed (not sticky) so the bar can slim down on scroll without
+         pushing the page around; body padding-top reserves its full
+         height at the top of the page */
       .topbar {
-        position: sticky; top: 0; z-index: 40;
+        position: fixed; top: 0; left: 0; right: 0; z-index: 40;
         background: color-mix(in srgb, var(--bg) 82%, transparent);
         transition: background-color 0.6s ease;
         backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         border-bottom: 1px solid var(--line);
       }
-      .topbar-in { display: flex; align-items: center; gap: 14px; padding-top: 10px; padding-bottom: 10px; }
-      .brand { font-weight: 700; letter-spacing: 0.02em; font-size: 1.02rem; color: var(--ink); text-decoration: none; white-space: nowrap; }
-      .brand span { color: var(--purple); }
+      .topbar-in { display: flex; align-items: center; gap: 14px; padding-top: 8px; padding-bottom: 8px; transition: padding 0.35s ease; }
+      /* the signature logo: the printed name is only ~13% of the
+         artwork's height (the signature towers over it), so at the top
+         of the page the bar is tall enough for the name to read; once
+         the page scrolls (.condensed) the logo eases down to the old
+         bar height. --logo-w is the full-size width; the image keeps
+         its own 640:241 shape. */
+      :root { --logo-w: 255px; --logo-w-small: 124px; --bar-h: calc(var(--logo-w) * 241 / 640 + 17px); }
+      body { padding-top: var(--bar-h); }
+      .brand { display: block; flex: none; line-height: 0; border-radius: 6px; }
+      .brand img { display: block; width: var(--logo-w); height: auto; transition: width 0.35s ease; }
+      .topbar.condensed .topbar-in { padding-top: 5px; padding-bottom: 5px; }
+      .topbar.condensed .brand img { width: var(--logo-w-small); }
+      .brand:focus-visible { outline: 2px solid var(--purple-bright); outline-offset: 3px; }
       .topnav { display: flex; gap: 18px; margin-left: auto; align-items: center; }
       .topnav a { color: var(--ink-2); text-decoration: none; font-size: 0.94rem; font-weight: 600; }
       .topnav a:hover { color: var(--purple); }
@@ -342,7 +356,8 @@
         .topnav a.navlink { display: none; }
         .topnav { gap: 8px; }
         .topbar-in { gap: 8px; }
-        .brand { font-size: 0.88rem; }
+        /* phones: as wide as fits beside the EN/ES toggle, max 223px */
+        :root { --logo-w: min(223px, calc(100vw - 152px)); --logo-w-small: 116px; }
         .lang-switch button { padding: 4px 9px; font-size: 0.8rem; }
       }
       .topnav a.navlink[aria-current="page"] { color: var(--purple); text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 2px; }
@@ -1002,7 +1017,7 @@
 
     <header class="topbar">
       <div class="wrap topbar-in">
-        <a class="brand" href="#top" data-goto="home">Maximiliano <span>Galindo</span></a>
+        <a class="brand" href="#top" data-goto="home"><img src="images/logo.png" width="640" height="241" alt="Maximiliano Galindo Gutiérrez" fetchpriority="high" /></a>
         <nav class="topnav" aria-label="Main">
           <a class="navlink" href="#top" data-goto="home" data-i18n="nav.home">Home</a>
           <a class="navlink" href="#score" data-goto="score" data-i18n="nav.score">Free Score</a>
@@ -3195,6 +3210,19 @@
           }, { passive: true });
           lavaWake();
         }
+
+        /* ---------- top bar: full logo at the top of the page, slim
+           bar once scrolled. Two thresholds (hysteresis) so it can't
+           flicker when the page rests right at the edge. ---------- */
+        var topbarEl = document.querySelector(".topbar"), barRaf = null;
+        function syncBar() {
+          barRaf = null;
+          var y = window.scrollY || 0, small = topbarEl.classList.contains("condensed");
+          if (!small && y > 40) topbarEl.classList.add("condensed");
+          else if (small && y < 8) topbarEl.classList.remove("condensed");
+        }
+        window.addEventListener("scroll", function () { if (!barRaf) barRaf = requestAnimationFrame(syncBar); }, { passive: true });
+        syncBar();
 
         /* ---------- scroll reveal (see .rv) ---------- */
         if (window.IntersectionObserver && !reduceMotion) {
