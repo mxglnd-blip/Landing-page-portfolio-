@@ -57,6 +57,7 @@
       body {
         margin: 0;
         background: var(--bg);
+        transition: background-color 0.6s ease;
         color: var(--ink);
         font-family: "Avenir Next", Avenir, "Segoe UI", system-ui, -apple-system, sans-serif;
         font-size: 17px;
@@ -98,7 +99,10 @@
          The orbs still multiply-blend with each other inside the
          layer, and the glass surfaces above still blur this layer
          through their backdrop filters at full strength. */
-      .lava { position: fixed; inset: -10vmax; z-index: 0; overflow: hidden; pointer-events: none; }
+      .lava { position: fixed; inset: -10vmax; z-index: 0; overflow: hidden; pointer-events: none; transition: opacity 0.3s ease; }
+      /* CSS-fallback scheme change: dip, swap, come back (the WebGL
+         lava morphs its colors instead) */
+      .lava.swap { opacity: 0.25; }
       .blob-wrap { position: absolute; will-change: transform; }
       .blob { border-radius: 50%; filter: blur(12px) saturate(var(--blob-sat, 1.13)); mix-blend-mode: multiply; will-change: transform, translate, rotate; }
       /* the WebGL lava (see the script) replaces the CSS orbs when it
@@ -129,11 +133,11 @@
       .b6 { width: 29vmax; height: 29vmax; background: var(--orb-f); animation: driftX3 8.5s ease-in-out infinite alternate, driftY3 7s ease-in-out infinite alternate, spin 56s linear infinite reverse; animation-delay: -9s, -12s, -3s; }
       .b7 { width: 25vmax; height: 25vmax; background: var(--orb-g); animation: driftX2 7.5s ease-in-out infinite alternate, driftY1 6s ease-in-out infinite alternate, spin 44s linear infinite; animation-delay: -3s, -10s, -17s; }
 
-      /* ---- background color schemes: data-scheme on <html> picks
-         one (the page ships "earth"; "flags", or no attribute for
-         Vivid). Each scheme sets the page tint, the orb gradients
-         the CSS fallback lava uses, and — read by the script — the
-         colors of the WebGL lava. ---- */
+      /* ---- background color schemes: the switcher (markup + script
+         near the dock) sets data-scheme on <html> — the page ships
+         "earth"; "flags", or no attribute for Vivid. Each scheme sets
+         the page tint and the orb gradients the CSS fallback lava
+         uses; the WebGL lava has matching palettes in the script. ---- */
       /* EARTH: deeper greens — forest, moss, olive — with warm
          browns (bark, terracotta, khaki) melting between them */
       html[data-scheme="earth"] {
@@ -170,6 +174,99 @@
         --blob-sat: 1.18;
       }
 
+      /* ---- background scheme switcher: a small liquid-glass pill
+         floating just above the dock, so Max can flip between the
+         three backgrounds live and compare. EARTH is the default
+         (the markup ships data-scheme="earth"). The thumb
+         (.scheme-thumb) is the dock toggle's twin: CLEAR
+         see-through glass — a whisper of white sheen plus a faint
+         lilac tint, bright rim, glossy top lip — resting behind
+         the pressed option's label. It can be tapped to (a button
+         click glides it over) or DRAGGED: press and slide and it
+         follows the finger freely in both directions, swelling
+         and stretching like liquid, with no snap and no scheme
+         change mid-drag; let go and it snaps onto the nearest
+         option and picks that scheme. touch-action: pan-y hands
+         horizontal drags to the pointer events while vertical
+         page scroll still works. ---- */
+      .scheme-switch {
+        position: fixed; left: 50%; transform: translateX(-50%);
+        bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+        z-index: 79; display: inline-flex; align-items: center; gap: 2px;
+        touch-action: pan-y;
+        -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+        padding: 4px; border-radius: 999px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.1) 45%, rgba(255, 255, 255, 0.02) 65%),
+                    color-mix(in srgb, var(--surface) 48%, transparent);
+        border: 1px solid color-mix(in srgb, #ffffff 70%, var(--line));
+        -webkit-backdrop-filter: blur(18px) saturate(1.65) brightness(1.05); backdrop-filter: blur(18px) saturate(1.65) brightness(1.05);
+        box-shadow:
+          inset 0 1.5px 0 rgba(255, 255, 255, 0.9),
+          inset 0 -10px 16px -8px rgba(23, 42, 30, 0.22),
+          0 4px 10px rgba(20, 35, 25, 0.16),
+          0 18px 36px -12px rgba(20, 35, 25, 0.4);
+      }
+      .scheme-switch button {
+        position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px;
+        border: 0; background: transparent; color: var(--ink-2); font: inherit; font-size: 0.78rem; font-weight: 700;
+        padding: 6px 11px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+        transition: color 0.25s ease;
+      }
+      /* the thumb is clear glass now, not purple fill, so the
+         pressed label reads in deep purple on top of it */
+      .scheme-switch button[aria-pressed="true"] { color: var(--purple); }
+      .scheme-switch.sliding { cursor: grabbing; }
+      .scheme-switch button:focus-visible { outline: 2px solid var(--purple-bright); outline-offset: 2px; }
+      .scheme-switch .sw { width: 13px; height: 13px; border-radius: 50%; flex: none; border: 1px solid rgba(0, 0, 0, 0.22); }
+      .sw-vivid { background: conic-gradient(#ffd23f, #ff5cae, #7c60ff, #38b26a, #ffd23f); }
+      .sw-earth { background: conic-gradient(#2e5a2e, #7a8450, #a06a3c, #40513b, #2e5a2e); }
+      .sw-flags { background: conic-gradient(#006847 0 22%, #f5f2ea 0 38%, #ce1126 0 54%, #3c3b6e 0 72%, #b22234 0 88%, #006847 0); }
+      /* the sliding toggle, dock edition: the fill is barely
+         there (white sheen + faint lilac tint) and the backdrop
+         blur is a whisper (0.5px), so the labels and the lava
+         behind show through sharp — the bright rim and glossy
+         top lip are what read as glass. --tx/--ty = its left/top
+         edge, --sx/--sy = the liquid stretch the script feeds
+         while it travels. */
+      .scheme-thumb {
+        position: absolute; z-index: 0; left: 0; top: 0; pointer-events: none; opacity: 0;
+        border-radius: 999px;
+        transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0) scale(var(--sx, 1), var(--sy, 1));
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.02) 70%),
+                    color-mix(in srgb, var(--lilac) 14%, transparent);
+        -webkit-backdrop-filter: blur(0.5px) saturate(1.25) brightness(1.03); backdrop-filter: blur(0.5px) saturate(1.25) brightness(1.03);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        box-shadow:
+          inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+          inset 0 -8px 14px -6px rgba(74, 29, 122, 0.16),
+          0 3px 8px rgba(20, 35, 25, 0.16);
+        transition: transform 0.32s cubic-bezier(0.25, 1.15, 0.35, 1),
+                    width 0.32s cubic-bezier(0.25, 1.15, 0.35, 1),
+                    height 0.32s cubic-bezier(0.25, 1.15, 0.35, 1),
+                    opacity 0.2s ease,
+                    box-shadow 0.25s ease;
+        will-change: transform;
+      }
+      /* while the thumb travels (gliding to a tapped option, or
+         dragged) the blur deepens a touch and the rim brightens,
+         then it settles back to plain clear glass at rest */
+      .scheme-thumb.live {
+        -webkit-backdrop-filter: blur(1.5px) saturate(1.5) brightness(1.06); backdrop-filter: blur(1.5px) saturate(1.5) brightness(1.06);
+        box-shadow:
+          inset 0 2px 0 rgba(255, 255, 255, 1),
+          inset 0 -10px 16px -6px rgba(74, 29, 122, 0.22),
+          0 8px 20px rgba(20, 35, 25, 0.26);
+      }
+      /* while DRAGGED the thumb tracks the finger 1:1 — the
+         glide transitions come off transform and size until the
+         pointer is released and the snap takes over */
+      .scheme-thumb.drag {
+        transition: opacity 0.2s ease, box-shadow 0.25s ease;
+      }
+      @media (max-width: 480px) {
+        .scheme-switch button { font-size: 0.72rem; padding: 5px 8px; gap: 5px; }
+        .scheme-switch .sw { width: 11px; height: 11px; }
+      }
       @keyframes driftX1 { from { translate: -6vmax 0; } to { translate: 7vmax 0; } }
       @keyframes driftX2 { from { translate: 6vmax 0; } to { translate: -6vmax 0; } }
       @keyframes driftX3 { from { translate: -5vmax 0; } to { translate: 8vmax 0; } }
@@ -190,7 +287,7 @@
         .blob { animation: none; }
         .btn-next::after { animation: none; }
         .view.active { animation: none; }
-        .panel, .quiz-teaser, .svc, .work-card, .built-item, .network-note, .score-shell, .contact, .btn, .dock a, .dock-thumb, .menu, .menu-thumb, .lang-thumb, .lightbox, #lbImg { transition: none; }
+        .panel, .quiz-teaser, .svc, .work-card, .built-item, .network-note, .score-shell, .contact, .btn, .dock a, .dock-thumb, .menu, .menu-thumb, .lang-thumb, .scheme-thumb, .lightbox, #lbImg, .lava, body { transition: none; }
         html { scroll-behavior: auto; }
       }
 
@@ -198,6 +295,7 @@
       .topbar {
         position: sticky; top: 0; z-index: 40;
         background: color-mix(in srgb, var(--bg) 82%, transparent);
+        transition: background-color 0.6s ease;
         backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         border-bottom: 1px solid var(--line);
       }
@@ -737,7 +835,8 @@
          selects it. Same heavy 3D liquid glass as the panes; works
          at every width, and the body gets bottom padding so the dock
          never covers content. ---- */
-      body { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+      /* clears the dock AND the scheme pill stacked above it */
+      body { padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
       .dock {
         position: fixed; left: 50%;
         transform: translateX(-50%);
@@ -1601,6 +1700,17 @@
       </a>
     </nav>
 
+    <!-- BACKGROUND SCHEME SWITCHER — a small liquid-glass pill above
+         the dock: Vivid (the original pastel lava) / Earth (deeper
+         greens, olives, warm browns) / Flags (Mexican + American
+         flag colors mixed). Flips the lava background live so the
+         three can be compared side by side. -->
+    <div class="scheme-switch" role="group" aria-label="Background colors / Colores de fondo">
+      <button type="button" data-scheme-btn="vivid" aria-pressed="false"><i class="sw sw-vivid" aria-hidden="true"></i><span data-i18n="scheme.vivid">Vivid</span></button>
+      <button type="button" data-scheme-btn="earth" aria-pressed="true"><i class="sw sw-earth" aria-hidden="true"></i><span data-i18n="scheme.earth">Earth</span></button>
+      <button type="button" data-scheme-btn="flags" aria-pressed="false"><i class="sw sw-flags" aria-hidden="true"></i><span data-i18n="scheme.flags">Flags</span></button>
+    </div>
+
     <!-- GALLERY LIGHTBOX -->
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
       <button type="button" class="lb-close" id="lbClose" aria-label="Close">×</button>
@@ -1632,6 +1742,7 @@
         var I18N = {
           en: {
             "nav.score": "Free Score", "nav.services": "Services", "nav.work": "Work", "nav.contact": "Contact",
+            "scheme.vivid": "Vivid", "scheme.earth": "Earth", "scheme.flags": "Flags",
             "hero.h1": "Your business, looking as good as it <em>actually is.</em>",
             "hero.sub": "I'm Maximiliano Galindo. I build <strong>brand identities, websites and day-to-day systems</strong> for small businesses — in English and Spanish, so nothing about your business gets lost in translation.",
             "hero.cta2": "See the work",
@@ -1802,6 +1913,7 @@
           },
           es: {
             "nav.score": "Puntaje gratis", "nav.services": "Servicios", "nav.work": "Trabajo", "nav.contact": "Contacto",
+            "scheme.vivid": "Vivos", "scheme.earth": "Tierra", "scheme.flags": "Banderas",
             "hero.h1": "Tu negocio, luciendo tan bien como <em>realmente es.</em>",
             "hero.sub": "Soy Maximiliano Galindo. Creo <strong>identidades de marca, sitios web y sistemas de trabajo diario</strong> para negocios pequeños — en inglés y en español, para que nada de tu negocio se pierda en la traducción.",
             "hero.cta2": "Ver el trabajo",
@@ -2019,6 +2131,7 @@
           }
           /* label widths changed: re-seat the sliding thumbs */
           syncLangThumb(false);
+          syncSchemeThumb(false);
           if (lastResult) renderResult(lastResult, false);
           fillHints();
           if (lbGallery) renderLb();
@@ -2039,13 +2152,13 @@
         }
         function menuItems(wrap) { return wrap.querySelectorAll(".menu a, .menu button"); }
         /* a menu that opens low on the screen would run under the
-           fixed dock (it sits above everything), and
+           fixed scheme pill + dock (they sit above everything), and
            its last options couldn't be tapped: glide the page up just
            enough for the whole menu to clear them */
         function revealMenu(wrap) {
           var menu = wrap.querySelector(".menu");
           var floor = window.innerHeight;
-          var fixed = document.querySelectorAll(".dock");
+          var fixed = document.querySelectorAll(".scheme-switch, .dock");
           for (var f = 0; f < fixed.length; f++) floor = Math.min(floor, fixed[f].getBoundingClientRect().top);
           var over = menu.getBoundingClientRect().bottom + 6 /* the open state drops 6px */ + 12 - floor;
           if (over > 0) window.scrollBy({ top: over, behavior: reduceMotion ? "auto" : "smooth" });
@@ -2133,6 +2246,200 @@
           langThumb.setAttribute("aria-hidden", "true");
           langSwitchEl.insertBefore(langThumb, langSwitchEl.firstChild);
           syncLangThumb(true);
+        }
+
+        /* ---------- background scheme switcher: Vivid / Earth /
+           Flags. EARTH is the default — the markup ships
+           data-scheme="earth" on <html> with the Earth button
+           pressed. Picking one sets data-scheme on <html> (Vivid =
+           no attribute, the :root palette) and the CSS swaps the
+           lava orbs, page tint and blob saturation — nothing else
+           moves. The thumb is the dock toggle's twin: a CLEAR
+           see-through glass oval that rests behind the pressed
+           label. It can be tapped to (a button click glides it
+           over) or DRAGGED, dock-style: press and slide and it
+           follows the finger freely in both directions —
+           swelling slightly and stretching with speed like a
+           droplet — with NO snap and NO scheme change while it
+           travels. Let go and only then does it snap onto the
+           nearest option and pick that scheme. A plain tap is
+           left alone: only movement past a few pixels becomes a
+           slide, and the click a slide ends with is swallowed so
+           it can't also fire the option underneath. The colors
+           crossfade (the lava dips, swaps, comes back) rather than
+           snapping, and the choice is kept for this browser session.
+           ---------- */
+        var schemeSwitchEl = document.querySelector(".scheme-switch");
+        var schemeThumb = null, schemeLiveT = null;
+        var schemeTX = null, schemeDragId = null, schemeStartX = 0,
+            schemeStartTX = 0, schemeLastX = 0, schemeVel = 0,
+            schemeMoved = false, schemeSwallow = false,
+            schemePendingX = null, schemeRaf = null;
+        function schemeBtnList() {
+          return schemeSwitchEl.querySelectorAll("button[data-scheme-btn]");
+        }
+        function schemePressedBtn() {
+          return schemeSwitchEl.querySelector("button[aria-pressed='true']") || schemeSwitchEl.querySelector("button");
+        }
+        function setSchemeThumbX(x, sx, sy) {
+          schemeTX = x;
+          schemeThumb.style.setProperty("--tx", x.toFixed(1) + "px");
+          schemeThumb.style.setProperty("--sx", (sx || 1).toFixed(3));
+          schemeThumb.style.setProperty("--sy", (sy || 1).toFixed(3));
+        }
+        function syncSchemeThumb(instant) {
+          if (!schemeSwitchEl || !schemeThumb) return;
+          if (schemeDragId !== null) return; /* a slide in progress owns the thumb */
+          var pressed = schemePressedBtn();
+          if (!pressed) return;
+          if (instant) schemeThumb.style.transition = "none";
+          schemeThumb.style.width = pressed.offsetWidth + "px";
+          schemeThumb.style.height = pressed.offsetHeight + "px";
+          setSchemeThumbX(pressed.offsetLeft, 1, 1);
+          schemeThumb.style.setProperty("--ty", pressed.offsetTop + "px");
+          schemeThumb.style.opacity = "1";
+          if (instant) { void schemeThumb.offsetWidth; schemeThumb.style.transition = ""; schemeThumb.classList.remove("live"); }
+          else {
+            schemeThumb.classList.add("live");
+            clearTimeout(schemeLiveT);
+            schemeLiveT = setTimeout(function () { schemeThumb.classList.remove("live"); }, 370);
+          }
+        }
+        var lavaEl = document.querySelector(".lava");
+        var schemeSwapT = null;
+        function applyScheme(name) {
+          if (name === "vivid") document.documentElement.removeAttribute("data-scheme");
+          else document.documentElement.setAttribute("data-scheme", name);
+        }
+        function pressScheme(name) {
+          var btns = schemeBtnList();
+          for (var i = 0; i < btns.length; i++) {
+            btns[i].setAttribute("aria-pressed", btns[i].getAttribute("data-scheme-btn") === name ? "true" : "false");
+          }
+        }
+        function setScheme(name) {
+          pressScheme(name);
+          syncSchemeThumb(false);
+          try { sessionStorage.setItem("scheme", name); } catch (e) {}
+          clearTimeout(schemeSwapT);
+          /* the WebGL lava morphs its own colors to the new palette */
+          if (glLava) { applyScheme(name); glLava.setScheme(name); return; }
+          if (!lavaEl || reduceMotion) { applyScheme(name); return; }
+          /* dip the lava (0.3s CSS fade), swap the gradients while it
+             is faint, then let it fade back up in the new colors */
+          lavaEl.classList.add("swap");
+          schemeSwapT = setTimeout(function () {
+            applyScheme(name);
+            lavaEl.classList.remove("swap");
+          }, 300);
+        }
+        /* free drag: while the pointer is down the thumb tracks
+           it 1:1, clamped only at the pill's two ends — it does
+           NOT stick to the options it passes over. The snap onto
+           the nearest option, and the scheme change itself,
+           happen only in schemeDragEnd, on release. */
+        function schemeClampX(x) {
+          var btns = schemeBtnList();
+          var first = btns[0], last = btns[btns.length - 1];
+          var w = schemeThumb.offsetWidth || first.offsetWidth;
+          return Math.max(first.offsetLeft, Math.min(last.offsetLeft + last.offsetWidth - w, x));
+        }
+        /* drag updates are batched onto animation frames, same
+           as the dock: the handler only records the latest
+           position; one apply per frame moves the glass. */
+        function schemeDragApply() {
+          schemeRaf = null;
+          if (schemeDragId === null || schemePendingX === null) return;
+          var cx = schemePendingX;
+          var dx = cx - schemeStartX;
+          if (!schemeMoved && Math.abs(dx) > 6) {
+            schemeMoved = true;
+            schemeThumb.classList.add("live", "drag");
+            schemeSwitchEl.classList.add("sliding");
+          }
+          if (schemeMoved) {
+            schemeVel = schemeVel * 0.55 + (cx - schemeLastX) * 0.45;
+            var stretch = Math.min(0.16, Math.abs(schemeVel) * 0.006);
+            setSchemeThumbX(schemeClampX(schemeStartTX + dx), 1 + stretch, 1 - stretch * 0.45);
+          }
+          schemeLastX = cx;
+        }
+        function schemeDragMove(e) {
+          if (schemeDragId === null || e.pointerId !== schemeDragId) return;
+          schemePendingX = e.clientX;
+          if (!schemeRaf) schemeRaf = requestAnimationFrame(schemeDragApply);
+        }
+        function schemeDragEnd(e) {
+          if (schemeDragId === null || (e && e.pointerId !== schemeDragId)) return;
+          /* flush the last recorded position so the snap starts
+             from where the finger actually let go */
+          if (schemeRaf) { cancelAnimationFrame(schemeRaf); schemeRaf = null; }
+          if (e && typeof e.clientX === "number") schemePendingX = e.clientX;
+          schemeDragApply();
+          schemeDragId = null;
+          window.removeEventListener("pointermove", schemeDragMove);
+          window.removeEventListener("pointerup", schemeDragEnd);
+          window.removeEventListener("pointercancel", schemeDragEnd);
+          schemeThumb.classList.remove("live", "drag");
+          schemeSwitchEl.classList.remove("sliding");
+          if (schemeMoved) {
+            schemeSwallow = true;
+            setTimeout(function () { schemeSwallow = false; }, 80);
+            var cx = (schemeTX || 0) + (schemeThumb.offsetWidth || 0) / 2, best = null, bestD = Infinity;
+            var btns = schemeBtnList();
+            for (var i = 0; i < btns.length; i++) {
+              var d = Math.abs(btns[i].offsetLeft + btns[i].offsetWidth / 2 - cx);
+              if (d < bestD) { bestD = d; best = btns[i]; }
+            }
+            schemeMoved = false;
+            if (best) {
+              /* settle the droplet shape, then glide onto the
+                 nearest option — and only NOW change the scheme */
+              setSchemeThumbX(schemeTX, 1, 1);
+              setScheme(best.getAttribute("data-scheme-btn"));
+            } else {
+              syncSchemeThumb(false);
+            }
+          }
+        }
+        if (schemeSwitchEl) {
+          schemeThumb = document.createElement("span");
+          schemeThumb.className = "scheme-thumb";
+          schemeThumb.setAttribute("aria-hidden", "true");
+          schemeSwitchEl.insertBefore(schemeThumb, schemeSwitchEl.firstChild);
+          var schemeBtns = schemeSwitchEl.querySelectorAll("button[data-scheme-btn]");
+          for (var sb = 0; sb < schemeBtns.length; sb++) {
+            (function (btn) {
+              btn.addEventListener("click", function () { setScheme(btn.getAttribute("data-scheme-btn")); });
+            })(schemeBtns[sb]);
+          }
+          /* a scheme picked earlier this session comes back without a fade */
+          var savedScheme = null;
+          try { savedScheme = sessionStorage.getItem("scheme"); } catch (e) {}
+          if (savedScheme && schemeSwitchEl.querySelector('[data-scheme-btn="' + savedScheme + '"]')) {
+            applyScheme(savedScheme);
+            pressScheme(savedScheme);
+          }
+          syncSchemeThumb(true);
+          if (window.PointerEvent) {
+            schemeSwitchEl.addEventListener("dragstart", function (e) { e.preventDefault(); });
+            schemeSwitchEl.addEventListener("pointerdown", function (e) {
+              if (typeof e.button === "number" && e.button > 0) return;
+              schemeDragId = e.pointerId;
+              schemeStartX = schemeLastX = e.clientX;
+              schemePendingX = e.clientX;
+              var pressed = schemePressedBtn();
+              schemeStartTX = schemeTX !== null ? schemeTX : (pressed ? pressed.offsetLeft : 0);
+              schemeVel = 0; schemeMoved = false;
+              window.addEventListener("pointermove", schemeDragMove, { passive: true });
+              window.addEventListener("pointerup", schemeDragEnd);
+              window.addEventListener("pointercancel", schemeDragEnd);
+            });
+            schemeSwitchEl.addEventListener("click", function (e) {
+              if (schemeSwallow) { e.preventDefault(); e.stopPropagation(); schemeSwallow = false; }
+            }, true);
+            window.addEventListener("blur", function () { schemeDragEnd(); });
+          }
         }
 
         /* ---------- dropdown menus: the sliding glass toggle,
@@ -2606,6 +2913,7 @@
         var lastW = window.innerWidth, resizeRaf = null;
         function reseatThumbs() {
           syncLangThumb(true);
+          syncSchemeThumb(true);
           syncDock(true);
         }
         window.addEventListener("resize", function () {
@@ -2729,19 +3037,27 @@
           var U = {};
           ["uRes", "uBg", "uStr", "uEdge", "uB", "uIn", "uOut"].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
 
-          var scheme = document.documentElement.getAttribute("data-scheme") || "vivid";
-          var pal = LAVA_COLORS[scheme] || LAVA_COLORS.vivid;
-          var inC = [], outC = [];
-          pal.forEach(function (c) { for (var k = 0; k < 3; k++) { inC.push(c[0][k] / 255); outC.push(c[1][k] / 255); } });
-          gl.uniform3fv(U.uIn, inC); gl.uniform3fv(U.uOut, outC);
-          gl.uniform1f(U.uStr, LAVA_STRENGTH[scheme] || 0.6);
+          /* a palette = inner colors, outer colors, page tint, strength,
+             flattened for the uniforms; scheme switches tween between two */
+          function readPalette(name) {
+            var pal = LAVA_COLORS[name] || LAVA_COLORS.vivid, v = [];
+            pal.forEach(function (c) { for (var k = 0; k < 3; k++) v.push(c[0][k] / 255); });
+            pal.forEach(function (c) { for (var k = 0; k < 3; k++) v.push(c[1][k] / 255); });
+            var hex = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+            var bgv = /^#[0-9a-f]{6}$/i.test(hex) ? [1, 3, 5].map(function (i) { return parseInt(hex.substr(i, 2), 16) / 255; }) : [0.93, 0.95, 0.91];
+            return v.concat(bgv, [LAVA_STRENGTH[name] || 0.6]);
+          }
+          function uploadPalette(v) {
+            gl.uniform3fv(U.uIn, v.slice(0, 21)); gl.uniform3fv(U.uOut, v.slice(21, 42));
+            gl.uniform3fv(U.uBg, v.slice(42, 45)); gl.uniform1f(U.uStr, v[45]);
+          }
+          var palNow = readPalette(document.documentElement.getAttribute("data-scheme") || "vivid");
+          var palFrom = null, palTo = null, palStart = 0;
+          uploadPalette(palNow);
           /* edge softness in canvas pixels either side of the surface
              (≈ 3 screen pixels after the upscale): a defined but still
              soft-edged shape; 1 = a hard cutout, 6+ = hazy again */
           gl.uniform1f(U.uEdge, 2.0);
-          var bgHex = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
-          var bg = /^#[0-9a-f]{6}$/i.test(bgHex) ? [1, 3, 5].map(function (i) { return parseInt(bgHex.substr(i, 2), 16) / 255; }) : [0.93, 0.95, 0.91];
-          gl.uniform3fv(U.uBg, bg);
 
           var W = 0, H = 0, asp = 1;
           function size() {
@@ -2801,9 +3117,16 @@
               /* travelling fast stretches the blob tall */
               uB[i * 4 + 3] = 1 / (1 + 2.2 * Math.abs(vy));
             }
+            if (palTo) {
+              /* scheme switch: every color glides to the new palette */
+              var pk = Math.min(1, (now - palStart) / 700), pe = pk * pk * (3 - 2 * pk);
+              for (var pi = 0; pi < palNow.length; pi++) palNow[pi] = palFrom[pi] + (palTo[pi] - palFrom[pi]) * pe;
+              uploadPalette(palNow);
+              if (pk >= 1) palTo = null;
+            }
             gl.uniform4fv(U.uB, uB);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-            raf = reduceMotion ? null : requestAnimationFrame(frame);
+            raf = reduceMotion && !palTo ? null : requestAnimationFrame(frame);
           }
           var lastW = window.innerWidth;
           window.addEventListener("resize", function () {
@@ -2821,7 +3144,15 @@
           document.documentElement.classList.add("gl-lava");
           size();
           frame(performance.now());
-          return true;
+          return {
+            setScheme: function (name) {
+              palFrom = palNow.slice();
+              palTo = readPalette(name); /* applyScheme already set --bg */
+              palStart = performance.now();
+              if (reduceMotion) { palNow = palTo.slice(); palTo = null; uploadPalette(palNow); frame(performance.now()); }
+              else if (!raf) raf = requestAnimationFrame(frame);
+            }
+          };
         }
         var glLava = startGLLava();
 
