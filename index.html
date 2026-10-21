@@ -206,6 +206,33 @@
           0 4px 10px rgba(20, 35, 25, 0.16),
           0 18px 36px -12px rgba(20, 35, 25, 0.4);
       }
+      /* attention nudge: until the visitor first touches the pill, it
+         gives a soft hop-and-wiggle every 7 s while a faint purple ring
+         ripples out from it. It uses the standalone translate / rotate
+         properties (the pill's transform keeps it centred) and the ring
+         is transform + opacity only, so it all runs on the GPU. The
+         script adds .attn on load and removes it for the rest of the
+         visit on the first tap or drag. */
+      .scheme-switch::after {
+        content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--purple-bright) 70%, transparent);
+        opacity: 0;
+      }
+      .scheme-switch.attn { animation: schemeNudge 7s ease-in-out 2.5s infinite; }
+      .scheme-switch.attn::after { animation: schemeRing 7s ease-out 2.5s infinite; }
+      @keyframes schemeNudge {
+        0%, 70%, 92%, 100% { translate: 0 0; rotate: 0deg; }
+        74% { translate: 0 -7px; rotate: -2.5deg; }
+        78% { translate: 0 0; rotate: 2deg; }
+        82% { translate: 0 -4px; rotate: -1.5deg; }
+        86% { translate: 0 0; rotate: 1deg; }
+        89% { translate: 0 -1px; rotate: -0.4deg; }
+      }
+      @keyframes schemeRing {
+        0%, 72% { opacity: 0; transform: scale(1); }
+        75% { opacity: 0.7; transform: scale(1); }
+        95%, 100% { opacity: 0; transform: scale(1.22, 1.6); }
+      }
       .scheme-switch button {
         position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px;
         border: 0; background: transparent; color: var(--ink-2); font: inherit; font-size: 0.78rem; font-weight: 700;
@@ -287,6 +314,7 @@
         .blob { animation: none; }
         .btn-next::after { animation: none; }
         .view.active { animation: none; }
+        .scheme-switch.attn, .scheme-switch.attn::after { animation: none; }
         .panel, .quiz-teaser, .svc, .work-card, .built-item, .network-note, .score-shell, .contact, .btn, .dock a, .dock-thumb, .menu, .menu-thumb, .lang-thumb, .scheme-thumb, .lightbox, #lbImg, .lava, body { transition: none; }
         html { scroll-behavior: auto; }
       }
@@ -2608,6 +2636,20 @@
           }
         }
         if (schemeSwitchEl) {
+          /* attention nudge (see .attn): on until the first touch this visit */
+          var seenSwitch = false;
+          try { seenSwitch = sessionStorage.getItem("schemeSeen") === "1"; } catch (e) {}
+          if (!seenSwitch) {
+            schemeSwitchEl.classList.add("attn");
+            var calmSwitch = function () {
+              schemeSwitchEl.classList.remove("attn");
+              try { sessionStorage.setItem("schemeSeen", "1"); } catch (e) {}
+              schemeSwitchEl.removeEventListener("pointerdown", calmSwitch);
+              schemeSwitchEl.removeEventListener("focusin", calmSwitch);
+            };
+            schemeSwitchEl.addEventListener("pointerdown", calmSwitch);
+            schemeSwitchEl.addEventListener("focusin", calmSwitch);
+          }
           schemeThumb = document.createElement("span");
           schemeThumb.className = "scheme-thumb";
           schemeThumb.setAttribute("aria-hidden", "true");
