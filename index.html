@@ -52,8 +52,8 @@
       }
       * { box-sizing: border-box; }
       html { scroll-behavior: smooth; overflow-x: clip; }
-      /* anchors land below the sticky top bar instead of under it */
-      section[id], #quizPanel, #scoreResult { scroll-margin-top: 76px; }
+      /* a little breathing room above anchors when the page jumps to them */
+      section[id], #quizPanel, #scoreResult { scroll-margin-top: 20px; }
       body {
         margin: 0;
         background: var(--bg);
@@ -287,34 +287,25 @@
         .blob { animation: none; }
         .btn-next::after { animation: none; }
         .view.active { animation: none; }
-        .panel, .quiz-teaser, .svc, .work-card, .built-item, .network-note, .score-shell, .contact, .btn, .dock a, .dock-thumb, .menu, .menu-thumb, .lang-thumb, .scheme-thumb, .lightbox, #lbImg, .lava, body, .topbar-in, .brand img { transition: none; }
+        .panel, .quiz-teaser, .svc, .work-card, .built-item, .network-note, .score-shell, .contact, .btn, .dock a, .dock-thumb, .menu, .menu-thumb, .lang-thumb, .scheme-thumb, .lightbox, #lbImg, .lava, body { transition: none; }
         html { scroll-behavior: auto; }
       }
 
       /* ---- top bar ---- */
-      /* fixed (not sticky) so the bar can slim down on scroll without
-         pushing the page around; body padding-top reserves its full
-         height at the top of the page */
-      .topbar {
-        position: fixed; top: 0; left: 0; right: 0; z-index: 40;
-        background: color-mix(in srgb, var(--bg) 82%, transparent);
-        transition: background-color 0.6s ease;
-        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-        border-bottom: 1px solid var(--line);
-      }
-      .topbar-in { display: flex; align-items: center; gap: 14px; padding-top: 8px; padding-bottom: 8px; transition: padding 0.35s ease; }
+      /* no bar: the logo, links and EN/ES sit straight on the moving
+         background at the top of the page and scroll away with it (the
+         dock handles navigation further down). Positioned over the
+         reserved body padding-top, so the page doesn't shift. */
+      .topbar { position: absolute; top: 0; left: 0; right: 0; z-index: 40; background: none; }
+      .topbar-in { display: flex; align-items: center; gap: 14px; padding-top: 8px; padding-bottom: 8px; }
       /* the signature logo: the printed name is only ~13% of the
-         artwork's height (the signature towers over it), so at the top
-         of the page the bar is tall enough for the name to read; once
-         the page scrolls (.condensed) the logo eases down to the old
-         bar height. --logo-w is the full-size width; the image keeps
-         its own 640:241 shape. */
-      :root { --logo-w: 255px; --logo-w-small: 124px; --bar-h: calc(var(--logo-w) * 241 / 640 + 17px); }
+         artwork's height (the signature towers over it), so it is shown
+         large enough for the name to read. --logo-w is its width; the
+         image keeps its own 640:241 shape. */
+      :root { --logo-w: 255px; --bar-h: calc(var(--logo-w) * 241 / 640 + 17px); }
       body { padding-top: var(--bar-h); }
       .brand { display: block; flex: none; line-height: 0; border-radius: 6px; }
-      .brand img { display: block; width: var(--logo-w); height: auto; transition: width 0.35s ease; }
-      .topbar.condensed .topbar-in { padding-top: 5px; padding-bottom: 5px; }
-      .topbar.condensed .brand img { width: var(--logo-w-small); }
+      .brand img { display: block; width: var(--logo-w); height: auto; }
       .brand:focus-visible { outline: 2px solid var(--purple-bright); outline-offset: 3px; }
       .topnav { display: flex; gap: 18px; margin-left: auto; align-items: center; }
       .topnav a { color: var(--ink-2); text-decoration: none; font-size: 0.94rem; font-weight: 600; }
@@ -357,7 +348,7 @@
         .topnav { gap: 8px; }
         .topbar-in { gap: 8px; }
         /* phones: as wide as fits beside the EN/ES toggle, max 223px */
-        :root { --logo-w: min(223px, calc(100vw - 152px)); --logo-w-small: 116px; }
+        :root { --logo-w: min(223px, calc(100vw - 152px)); }
         .lang-switch button { padding: 4px 9px; font-size: 0.8rem; }
       }
       .topnav a.navlink[aria-current="page"] { color: var(--purple); text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 2px; }
@@ -405,6 +396,12 @@
       /* wide artwork (a horizontal logo, a website) gets a wider tile */
       .bd-art img.wide { width: 168px; object-fit: contain; padding: 8px; }
       .bd-art img { object-fit: contain; }
+      /* the brand-guide breakdown: a grid of labelled tiles, each a
+         crop of one page of the guide (the full page opens in the gallery) */
+      .bd-art.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 12px; align-items: start; }
+      .bd-art.tiles button { justify-items: stretch; text-align: center; }
+      .bd-art.tiles img { width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; padding: 0; }
+      @media (max-width: 520px) { .bd-art.tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bd-art.tiles img { aspect-ratio: 3 / 2; } }
       .bd-to { color: var(--purple); font-size: 1.3rem; font-weight: 700; margin-bottom: 22px; }
       @media (max-width: 380px) { .bd-art img { width: 92px; height: 92px; } }
       @media (max-width: 520px) { .bd-art img.wide { width: 118px; height: 84px; padding: 6px; } }
@@ -768,10 +765,6 @@
         background: linear-gradient(160deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.05) 55%), color-mix(in srgb, var(--bg-soft) 48%, transparent);
         -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6);
         box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.7), 0 4px 12px -4px rgba(34, 48, 38, 0.2);
-      }
-      .topbar {
-        -webkit-backdrop-filter: blur(24px) saturate(1.7) brightness(1.03); backdrop-filter: blur(24px) saturate(1.7) brightness(1.03);
-        box-shadow: inset 0 -1.5px 0 rgba(255, 255, 255, 0.45), 0 10px 26px -14px rgba(34, 48, 38, 0.35);
       }
       /* buttons: thick glass domes — glossy top, deep base shade,
          layered drop shadow; hover lift + tilt lives further down */
@@ -1690,8 +1683,13 @@
               <div class="bd">
                 <h4 data-i18n="bd.title">The brand guide, broken down</h4>
                 <div class="bd-row">
-                  <div class="bd-art">
-                    <button type="button" data-open-gallery="orphital" data-slot="1" aria-haspopup="dialog"><img class="wide" src="images/orphital-website.jpg" width="1432" height="680" loading="lazy" decoding="async" alt="Orphital — website home page" /><span data-i18n="bd.site">Website</span></button>
+                  <div class="bd-art tiles">
+                    <button type="button" data-open-gallery="orphital" data-slot="2" aria-haspopup="dialog"><img src="images/orphital-versions.svg" width="1250" height="558" loading="lazy" decoding="async" alt="Orphital — logo versions on white, navy, red and sand" /><span data-i18n="bd.versions">Logo versions</span></button>
+                    <button type="button" data-open-gallery="orphital" data-slot="3" aria-haspopup="dialog"><img src="images/orphital-type.jpg" width="1000" height="603" loading="lazy" decoding="async" alt="Orphital — typeface, Work Sans" /><span data-i18n="bd.type">Typography</span></button>
+                    <button type="button" data-open-gallery="orphital" data-slot="4" aria-haspopup="dialog"><img src="images/orphital-grid.jpg" width="1000" height="574" loading="lazy" decoding="async" alt="Orphital — construction grid" /><span data-i18n="bd.gridT">Grid</span></button>
+                    <button type="button" data-open-gallery="orphital" data-slot="5" aria-haspopup="dialog"><img src="images/orphital-clearspace.jpg" width="1000" height="358" loading="lazy" decoding="async" alt="Orphital — protection area" /><span data-i18n="bd.space2">Protection area</span></button>
+                    <button type="button" data-open-gallery="orphital" data-slot="6" aria-haspopup="dialog"><img src="images/orphital-graphics.jpg" width="1000" height="457" loading="lazy" decoding="async" alt="Orphital — supporting graphics" /><span data-i18n="bd.aux">Supporting graphics</span></button>
+                    <button type="button" data-open-gallery="orphital" data-slot="1" aria-haspopup="dialog"><img src="images/orphital-website.jpg" width="1432" height="680" loading="lazy" decoding="async" alt="Orphital — website home page" /><span data-i18n="bd.site">Website</span></button>
                   </div>
                   <p class="bd-head"><b>Orphital</b> · <span data-i18n="cc.orph">Financial advisory brand</span> · <span data-i18n="lb.type">Type</span>: <span data-i18n="type.orph">Work Sans</span></p>
                   <div class="chip-row">
@@ -2063,6 +2061,14 @@
             "cn.midas": "Named for the king whose touch turned everything to gold — so the name is set in gold, the mark in solid black, and the tagline makes the promise: “The Gold Standard of Training.” The mark is a bold triangle, divided inside by a vertical bar and a crossbar. Redrawn as vector files — the full lockup and the mark alone — so it prints sharp at any size.",
             "g.midas.1": "The Midas Fitness logo, redrawn as a vector file: the black triangle mark above the gold name, with the tagline “The Gold Standard of Training.”",
             "g.midas.2": "The mark on its own, as a vector file — for social profiles, stickers and equipment, where the full name won't fit.",
+            "bd.gridT": "Grid",
+            "bd.space2": "Protection area",
+            "bd.aux": "Supporting graphics",
+            "g.orph.3": "Logo versions: full color on white, and one-color white on navy, red and sand — a version for every background.",
+            "g.orph.4": "Typeface: Work Sans — clean and highly legible, from headlines to the fine print a financial firm needs.",
+            "g.orph.5": "Construction grid: the icon and the full logo built on measured guides, so the proportions hold at every size.",
+            "g.orph.6": "Protection area: a fixed margin around the logo that no other text or graphic may enter.",
+            "g.orph.7": "Supporting graphics: a candlestick-chart pattern and a red hexagon, for decorating layouts without repeating the logo everywhere.",
             "g.ff.1": "Fantasy Flops — the Next tab, the screen you live on during a draft. It ranks who to pick next and explains each recommendation in plain language, including which players are likely to be gone before your next turn — so you're not just told a name, you're told why, and what waiting would cost.",
             "g.ff.2": "The Board tab: every player grouped by round tier, with two seasons of stats side by side. It's the big-picture view — where the value sits in each round, and how this season's numbers compare to last.",
             "g.ff.3": "A player page: the player's draft value, his tier, and how he fits your roster specifically. The same player can be a great pick for one team and a bad one for another — this screen shows the difference instead of pretending one ranking fits everyone.",
@@ -2260,6 +2266,14 @@
             "cn.midas": "Nombrada por el rey cuyo toque convertía todo en oro — por eso el nombre va en dorado, la marca en negro sólido, y el lema hace la promesa: “The Gold Standard of Training”. La marca es un triángulo sólido, dividido por dentro con una barra vertical y una horizontal. Redibujada como archivos vectoriales — el logo completo y la marca sola — para que se imprima nítida a cualquier tamaño.",
             "g.midas.1": "El logo de Midas Fitness, redibujado como archivo vectorial: la marca triangular negra sobre el nombre en dorado, con el lema “The Gold Standard of Training”.",
             "g.midas.2": "La marca sola, como archivo vectorial — para perfiles sociales, stickers y equipo, donde el nombre completo no cabe.",
+            "bd.gridT": "Retícula",
+            "bd.space2": "Área de protección",
+            "bd.aux": "Gráficos auxiliares",
+            "g.orph.3": "Versiones del logo: a todo color sobre blanco, y en blanco a una tinta sobre azul marino, rojo y arena — una versión para cada fondo.",
+            "g.orph.4": "Tipografía: Work Sans — limpia y muy legible, desde los titulares hasta la letra pequeña que necesita una firma financiera.",
+            "g.orph.5": "Retícula: el ícono y el logo completo construidos sobre guías medidas, para que las proporciones se mantengan a cualquier tamaño.",
+            "g.orph.6": "Área de protección: un margen fijo alrededor del logo donde no puede entrar ningún otro texto o gráfico.",
+            "g.orph.7": "Gráficos auxiliares: un patrón de velas japonesas y un hexágono rojo, para decorar diseños sin repetir el logo en todas partes.",
             "g.ff.1": "Fantasy Flops — la pestaña Next, la pantalla donde vives durante un draft. Ordena a quién elegir y explica cada recomendación en lenguaje simple, incluyendo qué jugadores probablemente ya no estarán cuando te toque de nuevo — así no solo recibes un nombre, recibes el porqué y lo que te costaría esperar.",
             "g.ff.2": "La pestaña Board: todos los jugadores agrupados por nivel de ronda, con dos temporadas de estadísticas lado a lado. Es la vista panorámica — dónde está el valor en cada ronda y cómo se comparan los números de esta temporada con la anterior.",
             "g.ff.3": "La página de un jugador: su valor de draft, su nivel y cómo encaja específicamente en tu roster. El mismo jugador puede ser una gran elección para un equipo y mala para otro — esta pantalla muestra la diferencia en lugar de fingir que un solo ranking le sirve a todos.",
@@ -3390,19 +3404,6 @@
           lavaWake();
         }
 
-        /* ---------- top bar: full logo at the top of the page, slim
-           bar once scrolled. Two thresholds (hysteresis) so it can't
-           flicker when the page rests right at the edge. ---------- */
-        var topbarEl = document.querySelector(".topbar"), barRaf = null;
-        function syncBar() {
-          barRaf = null;
-          var y = window.scrollY || 0, small = topbarEl.classList.contains("condensed");
-          if (!small && y > 40) topbarEl.classList.add("condensed");
-          else if (small && y < 8) topbarEl.classList.remove("condensed");
-        }
-        window.addEventListener("scroll", function () { if (!barRaf) barRaf = requestAnimationFrame(syncBar); }, { passive: true });
-        syncBar();
-
         /* ---------- scroll reveal (see .rv) ---------- */
         if (window.IntersectionObserver && !reduceMotion) {
           var rvIO = new IntersectionObserver(function (entries) {
@@ -3626,7 +3627,8 @@
           /* logo banner = the strip photo (slot 0); further pictures come
              from the breakdown tiles (linkTileGalleries) */
           midas: [{ cap: "g.midas.1", type: "type.midas", pal: [["#FFCC00", "pal.midas.1"], ["#000000", "pal.midas.2"]] }, { cap: "g.midas.2" }],
-          orphital: [{ cap: "g.orph.1", type: "type.orph", pal: ORPH_PAL }, { cap: "g.orph.2" }],
+          orphital: [{ cap: "g.orph.1", type: "type.orph", pal: ORPH_PAL }, { cap: "g.orph.2" }, { cap: "g.orph.3", pal: ORPH_PAL },
+            { cap: "g.orph.4", type: "type.orph" }, { cap: "g.orph.5" }, { cap: "g.orph.6" }, { cap: "g.orph.7" }],
           consulting: [{ cap: "g.cons.1" }],
           sofiasbrand: [{ cap: "g.sofb.1", type: "type.sofb", pal: [["#D61631", "pal.sofb.1"], ["#0D0D0D", "pal.sofb.2"]] }]
         };
