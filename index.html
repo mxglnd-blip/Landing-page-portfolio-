@@ -190,9 +190,7 @@
          horizontal drags to the pointer events while vertical
          page scroll still works. ---- */
       .scheme-switch {
-        position: fixed; left: 50%; transform: translateX(-50%);
-        bottom: calc(96px + env(safe-area-inset-bottom, 0px));
-        z-index: 79; display: inline-flex; align-items: center; gap: 2px;
+        position: relative; z-index: 79; display: inline-flex; align-items: center; gap: 2px;
         touch-action: pan-y;
         -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
         padding: 4px; border-radius: 999px;
@@ -208,7 +206,7 @@
       }
       /* attention nudge: until the visitor first touches the pill, it
          gives a soft hop-and-wiggle about 1 s after the page opens and
-         every 6 s after that, while a faint purple ring ripples out.
+         every 4 s after that, while a faint purple ring ripples out.
          The hop sits at the START of each cycle so the first one comes
          right away. It uses the standalone translate / rotate
          properties (the pill's transform keeps it centred) and the ring
@@ -220,20 +218,20 @@
         box-shadow: 0 0 0 2px color-mix(in srgb, var(--purple-bright) 70%, transparent);
         opacity: 0;
       }
-      .scheme-switch.attn { animation: schemeNudge 6s ease-in-out 1s infinite; }
-      .scheme-switch.attn::after { animation: schemeRing 6s ease-out 1s infinite; }
+      .scheme-switch.attn { animation: schemeNudge 4s ease-in-out 1s infinite; }
+      .scheme-switch.attn::after { animation: schemeRing 4s ease-out 1s infinite; }
       @keyframes schemeNudge {
-        0%, 24%, 100% { translate: 0 0; rotate: 0deg; }
-        4% { translate: 0 -8px; rotate: -3deg; }
-        8.5% { translate: 0 0; rotate: 2.5deg; }
-        13% { translate: 0 -4px; rotate: -1.5deg; }
-        17% { translate: 0 0; rotate: 1deg; }
-        20.5% { translate: 0 -1px; rotate: -0.4deg; }
+        0%, 36%, 100% { translate: 0 0; rotate: 0deg; }
+        6% { translate: 0 -8px; rotate: -3deg; }
+        12.75% { translate: 0 0; rotate: 2.5deg; }
+        19.5% { translate: 0 -4px; rotate: -1.5deg; }
+        25.5% { translate: 0 0; rotate: 1deg; }
+        30.75% { translate: 0 -1px; rotate: -0.4deg; }
       }
       @keyframes schemeRing {
         0% { opacity: 0; transform: scale(1); }
-        3% { opacity: 0.75; transform: scale(1); }
-        26%, 100% { opacity: 0; transform: scale(1.22, 1.6); }
+        4.5% { opacity: 0.75; transform: scale(1); }
+        39%, 100% { opacity: 0; transform: scale(1.22, 1.6); }
       }
       /* reduced motion: no movement, but still a cue — the ring glows
          softly in place */
@@ -917,12 +915,18 @@
          never covers content. ---- */
       /* clears the dock AND the scheme pill stacked above it */
       body { padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+      /* the two bottom controls share one fixed container: on phones
+         the color pill stacks above the dock; on wide screens they sit
+         side by side as one bar at matching height (see below) */
+      .bottom-ui {
+        position: fixed; left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 80;
+        display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; pointer-events: none;
+      }
+      .bottom-ui > * { pointer-events: auto; }
       .dock {
-        position: fixed; left: 50%;
-        transform: translateX(-50%);
+        position: relative;
         touch-action: pan-y;
         -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
-        bottom: calc(14px + env(safe-area-inset-bottom, 0px));
         z-index: 80; width: min(480px, calc(100% - 28px));
         display: flex; padding: 8px; gap: 2px;
         border-radius: 999px;
@@ -1066,6 +1070,20 @@
         transition: transform 0.35s ease, box-shadow 0.35s ease, opacity 0.6s ease var(--rv-d, 0s), translate 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) var(--rv-d, 0s);
       }
       .rv:not(.in) { opacity: 0; translate: 0 24px; }
+      /* (kept last so it wins over the base dock / pill rules)
+         wide screens: one row — page tabs on the left, colors on the
+         right — with icon-beside-label tabs at a readable size */
+      @media (min-width: 960px) {
+        body { padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
+        .bottom-ui { flex-direction: row; justify-content: center; align-items: stretch; gap: 12px; }
+        .dock { width: min(600px, calc(100vw - 400px)); padding: 7px; }
+        .dock a { flex-direction: row; justify-content: center; gap: 9px; padding: 10px 10px; font-size: 0.95rem; letter-spacing: 0.01em; }
+        .dock a svg { width: 22px; height: 22px; }
+        .dock-thumb { top: 7px; bottom: 7px; }
+        .scheme-switch { padding: 7px; gap: 4px; }
+        .scheme-switch button { font-size: 0.95rem; padding: 10px 16px; gap: 8px; }
+        .scheme-switch .sw { width: 16px; height: 16px; }
+      }
     </style>
   </head>
   <body>
@@ -1857,6 +1875,7 @@
          the .dock-thumb toggle is the glass oval that slides sideways
          inside it to the tab for the view you're on, refracting the
          icons it passes over. It can also be dragged across the tabs -->
+    <div class="bottom-ui">
     <nav class="dock" aria-label="Pages">
       <span class="dock-thumb" aria-hidden="true"></span>
       <a href="#top" data-goto="home" aria-current="page">
@@ -1887,6 +1906,7 @@
       <button type="button" data-scheme-btn="earth" aria-pressed="true"><i class="sw sw-earth" aria-hidden="true"></i><span data-i18n="scheme.earth">Earth</span></button>
       <button type="button" data-scheme-btn="flags" aria-pressed="false"><i class="sw sw-flags" aria-hidden="true"></i><span data-i18n="scheme.flags">Flags</span></button>
     </div>
+    </div><!-- /bottom-ui -->
 
     <!-- GALLERY LIGHTBOX -->
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
