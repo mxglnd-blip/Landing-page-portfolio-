@@ -424,6 +424,10 @@
       .built-item.has-media { padding: 0; overflow: hidden; }
       .built-item .b-body { padding: 20px 22px 22px; }
       .built-item .bd { margin-top: 14px; }
+      /* logo banners (Orphital, Sofía's, Midas): same white panel as the
+         consulting signature, with room around the artwork */
+      .strip-item img.banner-logo { padding: 30px 28px; }
+      @media (max-width: 520px) { .strip-item img.banner-logo { padding: 26px 22px; } }
       /* these cards span the full width, so on wide screens each
          strip photo takes ~40% (two and a bit visible) instead of the
          work cards' 82% — otherwise one photo filled ~900px */
@@ -1674,15 +1678,19 @@
           <h2 data-i18n="built.h2">Businesses I've built</h2>
           <p class="lede" data-i18n="built.lede">Ownership experience across finance, food service, fitness and consulting — covering sales, marketing, purchasing and financials. This is the experience I bring to your logo, your website and your systems.</p>
           <div class="built-list">
-            <article class="built-item">
+            <article class="built-item has-media">
+              <div class="strip" role="group" aria-label="Orphital Asesores Financieros logo">
+                <button type="button" class="strip-item lb-trigger" data-gallery="orphital" aria-haspopup="dialog">
+                  <img class="fit-paper banner-logo" src="images/orphital-logo.svg" width="4313" height="1433" loading="lazy" decoding="async" alt="Orphital Asesores Financieros — logo" />
+                </button>
+              </div>
+              <div class="b-body">
               <div class="b-head"><h3>Orphital Asesores Financieros</h3><span class="b-years">2018 – 2022</span><span class="b-role" data-i18n="b1.role">Co-founder &amp; co-owner · Guadalajara</span></div>
               <p data-i18n="b1.p">A registered financial advisory firm. I led marketing, sales and client management, built its bilingual website, and grew assets under management to $10.5 million MXN. The firm closed in 2025, after I had left, as the remaining partners moved on to other ventures.</p>
               <div class="bd">
                 <h4 data-i18n="bd.title">The brand guide, broken down</h4>
                 <div class="bd-row">
                   <div class="bd-art">
-                    <button type="button" data-open-gallery="orphital" data-slot="0" aria-haspopup="dialog"><img class="wide" src="images/orphital-logo.svg" width="4313" height="1433" loading="lazy" decoding="async" alt="Orphital — vector logo" /><span data-i18n="bd.vector">Vector logo</span></button>
-                    <span class="bd-to" aria-hidden="true">→</span>
                     <button type="button" data-open-gallery="orphital" data-slot="1" aria-haspopup="dialog"><img class="wide" src="images/orphital-website.jpg" width="1432" height="680" loading="lazy" decoding="async" alt="Orphital — website home page" /><span data-i18n="bd.site">Website</span></button>
                   </div>
                   <p class="bd-head"><b>Orphital</b> · <span data-i18n="cc.orph">Financial advisory brand</span> · <span data-i18n="lb.type">Type</span>: <span data-i18n="type.orph">Work Sans</span></p>
@@ -1693,6 +1701,7 @@
                   </div>
                   <p data-i18n="cn.orph">The name joins <b>orphic</b> (mysterious, hidden) and <b>capital</b>: the O hides an arrow pointing up and to the right, and the icon is three Japanese candlesticks — the chart every trader reads. Name concept, logo, brand guide and website.</p>
                 </div>
+              </div>
               </div>
             </article>
             <article class="built-item has-media">
@@ -1706,15 +1715,18 @@
               <p data-i18n="b2.p">I've advised 70+ small businesses in Mexico and the U.S. on operations, marketing and customer experience — and built their websites, logos, SEO and paid-ad campaigns.</p>
               </div>
             </article>
-            <article class="built-item">
+            <article class="built-item has-media">
+              <div class="strip" role="group" aria-label="Sofía's Italian Beef logo">
+                <button type="button" class="strip-item lb-trigger" data-gallery="sofiasbrand" aria-haspopup="dialog">
+                  <img class="fit-paper banner-logo" src="images/sofias-logo.svg" width="1776" height="1712" loading="lazy" decoding="async" alt="Sofía's Italian Beef — logo" />
+                </button>
+              </div>
+              <div class="b-body">
               <div class="b-head"><h3>Sofía's Italian Beef</h3><span class="b-years">2015 – 2018</span><span class="b-role" data-i18n="b3.role">Founder &amp; owner · Guadalajara</span></div>
               <p data-i18n="b3.p">I brought a product that was new to the market — Chicago's Italian beef — and built a customer base quickly. I ran every part of it: cooking, sales, purchasing, finances and the brand.</p>
               <div class="bd">
                 <h4 data-i18n="bd.logoTitle">The logo, broken down</h4>
                 <div class="bd-row">
-                  <div class="bd-art">
-                    <button type="button" data-open-gallery="sofiasbrand" data-slot="0" aria-haspopup="dialog"><img src="images/sofias-logo.svg" width="1776" height="1712" loading="lazy" decoding="async" alt="Sofía's Italian Beef — vector logo" /><span data-i18n="bd.vector">Vector logo</span></button>
-                  </div>
                   <p class="bd-head"><b>Sofía's Italian Beef</b> · <span data-i18n="cc.sofb">Script in a round stamp</span> · <span data-i18n="lb.type">Type</span>: <span data-i18n="type.sofb">hand-lettered script + curved stamp lettering</span></p>
                   <div class="chip-row">
                     <span class="chip"><i style="background:#D61631"></i><span data-i18n="pal.sofb.1">Red</span> #D61631</span>
@@ -1723,10 +1735,32 @@
                   <p data-i18n="cn.sofb">Two colors and two jobs: the red script with its long swash carries the name and the energy, and the black curved lettering — ITALIAN BEEF above, GUADALAJARA below — closes it into the round stamp of a classic Chicago sandwich shop. Now redrawn as a vector file, so it prints sharp at any size, from a cup sticker to a storefront sign.</p>
                 </div>
               </div>
+              </div>
             </article>
-            <article class="built-item">
+            <article class="built-item has-media">
+              <div class="strip" role="group" aria-label="Midas Fitness logo">
+                <button type="button" class="strip-item lb-trigger" data-gallery="midas" aria-haspopup="dialog">
+                  <img class="fit-paper banner-logo" src="images/midas-lockup.svg" width="1610" height="1270" loading="lazy" decoding="async" alt="Midas Fitness — logo with the tagline The Gold Standard of Training" />
+                </button>
+              </div>
+              <div class="b-body">
               <div class="b-head"><h3>Midas Fitness</h3><span class="b-years">2015 – 2018</span><span class="b-role" data-i18n="b4.role">Co-founder &amp; CEO · Guadalajara</span></div>
               <p data-i18n="b4.p">A personal training business. I handled scheduling, client acquisition and expenses, and negotiated partnerships so clients could train at their own gyms.</p>
+              <div class="bd">
+                <h4 data-i18n="bd.logoTitle">The logo, broken down</h4>
+                <div class="bd-row">
+                  <div class="bd-art">
+                    <button type="button" data-open-gallery="midas" data-slot="1" aria-haspopup="dialog"><img src="images/midas-icon.svg" width="888" height="936" loading="lazy" decoding="async" alt="Midas Fitness — the mark on its own" /><span data-i18n="bd.mark2">The mark</span></button>
+                  </div>
+                  <p class="bd-head"><b>Midas Fitness</b> · <span data-i18n="cc.midas">Personal training brand</span> · <span data-i18n="lb.type">Type</span>: <span data-i18n="type.midas">condensed display capitals</span></p>
+                  <div class="chip-row">
+                    <span class="chip"><i style="background:#FFCC00"></i><span data-i18n="pal.midas.1">Gold</span> #FFCC00</span>
+                    <span class="chip"><i style="background:#000000"></i><span data-i18n="pal.midas.2">Black</span> #000000</span>
+                  </div>
+                  <p data-i18n="cn.midas">Named for the king whose touch turned everything to gold — so the name is set in gold, the mark in solid black, and the tagline makes the promise: “The Gold Standard of Training.” The mark is a bold triangle, divided inside by a vertical bar and a crossbar. Redrawn as vector files — the full lockup and the mark alone — so it prints sharp at any size.</p>
+                </div>
+              </div>
+              </div>
             </article>
           </div>
         </div>
@@ -2021,6 +2055,14 @@
             "g.orph.2": "Orphital's website home page: red and navy panels, the candlestick logo, and a clear “Saber más” button leading into the services.",
             "g.cons.1": "Name and signature: the full name in a serif, over a handwritten signature.",
             "g.sofb.1": "The Sofía's Italian Beef logo, redrawn as a vector file: the red script and the black stamp lettering in their exact colors, sharp at any size — ready for cups, menus, sign shops and printers.",
+            "bd.mark2": "The mark",
+            "cc.midas": "Personal training brand",
+            "type.midas": "condensed display capitals",
+            "pal.midas.1": "Gold",
+            "pal.midas.2": "Black",
+            "cn.midas": "Named for the king whose touch turned everything to gold — so the name is set in gold, the mark in solid black, and the tagline makes the promise: “The Gold Standard of Training.” The mark is a bold triangle, divided inside by a vertical bar and a crossbar. Redrawn as vector files — the full lockup and the mark alone — so it prints sharp at any size.",
+            "g.midas.1": "The Midas Fitness logo, redrawn as a vector file: the black triangle mark above the gold name, with the tagline “The Gold Standard of Training.”",
+            "g.midas.2": "The mark on its own, as a vector file — for social profiles, stickers and equipment, where the full name won't fit.",
             "g.ff.1": "Fantasy Flops — the Next tab, the screen you live on during a draft. It ranks who to pick next and explains each recommendation in plain language, including which players are likely to be gone before your next turn — so you're not just told a name, you're told why, and what waiting would cost.",
             "g.ff.2": "The Board tab: every player grouped by round tier, with two seasons of stats side by side. It's the big-picture view — where the value sits in each round, and how this season's numbers compare to last.",
             "g.ff.3": "A player page: the player's draft value, his tier, and how he fits your roster specifically. The same player can be a great pick for one team and a bad one for another — this screen shows the difference instead of pretending one ranking fits everyone.",
@@ -2210,6 +2252,14 @@
             "g.orph.2": "La página de inicio del sitio web de Orphital: paneles rojo y azul marino, el logo de velas y un botón claro de “Saber más” que lleva a los servicios.",
             "g.cons.1": "Nombre y firma: el nombre completo en una tipografía serif, sobre una firma a mano.",
             "g.sofb.1": "El logo de Sofía's Italian Beef, redibujado como archivo vectorial: la caligrafía roja y las letras negras del sello en sus colores exactos, nítido a cualquier tamaño — listo para vasos, menús, rotulistas e imprentas.",
+            "bd.mark2": "La marca",
+            "cc.midas": "Marca de entrenamiento personal",
+            "type.midas": "mayúsculas condensadas de display",
+            "pal.midas.1": "Oro",
+            "pal.midas.2": "Negro",
+            "cn.midas": "Nombrada por el rey cuyo toque convertía todo en oro — por eso el nombre va en dorado, la marca en negro sólido, y el lema hace la promesa: “The Gold Standard of Training”. La marca es un triángulo sólido, dividido por dentro con una barra vertical y una horizontal. Redibujada como archivos vectoriales — el logo completo y la marca sola — para que se imprima nítida a cualquier tamaño.",
+            "g.midas.1": "El logo de Midas Fitness, redibujado como archivo vectorial: la marca triangular negra sobre el nombre en dorado, con el lema “The Gold Standard of Training”.",
+            "g.midas.2": "La marca sola, como archivo vectorial — para perfiles sociales, stickers y equipo, donde el nombre completo no cabe.",
             "g.ff.1": "Fantasy Flops — la pestaña Next, la pantalla donde vives durante un draft. Ordena a quién elegir y explica cada recomendación en lenguaje simple, incluyendo qué jugadores probablemente ya no estarán cuando te toque de nuevo — así no solo recibes un nombre, recibes el porqué y lo que te costaría esperar.",
             "g.ff.2": "La pestaña Board: todos los jugadores agrupados por nivel de ronda, con dos temporadas de estadísticas lado a lado. Es la vista panorámica — dónde está el valor en cada ronda y cómo se comparan los números de esta temporada con la anterior.",
             "g.ff.3": "La página de un jugador: su valor de draft, su nivel y cómo encaja específicamente en tu roster. El mismo jugador puede ser una gran elección para un equipo y mala para otro — esta pantalla muestra la diferencia en lugar de fingir que un solo ranking le sirve a todos.",
@@ -3573,8 +3623,9 @@
           ],
           emancipated: [{ cap: "g.eman.1" }],
           fantasy: [{ cap: "g.ff.1" }, { cap: "g.ff.2" }, { cap: "g.ff.3" }, { cap: "g.ff.4" }],
-          /* Orphital and Sofía's (below) have no strip: their pictures
-             are the breakdown tiles (linkTileGalleries) */
+          /* logo banner = the strip photo (slot 0); further pictures come
+             from the breakdown tiles (linkTileGalleries) */
+          midas: [{ cap: "g.midas.1", type: "type.midas", pal: [["#FFCC00", "pal.midas.1"], ["#000000", "pal.midas.2"]] }, { cap: "g.midas.2" }],
           orphital: [{ cap: "g.orph.1", type: "type.orph", pal: ORPH_PAL }, { cap: "g.orph.2" }],
           consulting: [{ cap: "g.cons.1" }],
           sofiasbrand: [{ cap: "g.sofb.1", type: "type.sofb", pal: [["#D61631", "pal.sofb.1"], ["#0D0D0D", "pal.sofb.2"]] }]
