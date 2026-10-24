@@ -919,7 +919,8 @@
          the color pill stacks above the dock; on wide screens they sit
          side by side as one bar at matching height (see below) */
       .bottom-ui {
-        position: fixed; left: 0; right: 0; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 80;
+        position: fixed; left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px);
+        bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 80;
         display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; pointer-events: none;
       }
       .bottom-ui > * { pointer-events: auto; }
@@ -1071,7 +1072,17 @@
       }
       .rv:not(.in) { opacity: 0; translate: 0 24px; }
       /* (kept last so it wins over the base dock / pill rules)
-         wide screens: one row — page tabs on the left, colors on the
+         medium widths — tablets, landscape phones, an unfolded iPhone
+         Duo in landscape beside its side controls: the same single
+         row, but the dock keeps the compact icon-over-label tabs, so a
+         short landscape screen gets back the height the stacked pill
+         used to take */
+      @media (min-width: 700px) and (max-width: 959.98px) {
+        body { padding-bottom: calc(108px + env(safe-area-inset-bottom, 0px)); }
+        .bottom-ui { flex-direction: row; justify-content: center; align-items: stretch; gap: 12px; }
+        .dock { width: min(480px, calc(100vw - 390px)); }
+      }
+      /* wide screens: one row — page tabs on the left, colors on the
          right — with icon-beside-label tabs at a readable size */
       @media (min-width: 960px) {
         body { padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
