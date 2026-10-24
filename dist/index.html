@@ -1095,6 +1095,63 @@
         .scheme-switch button { font-size: 0.95rem; padding: 10px 16px; gap: 8px; }
         .scheme-switch .sw { width: 16px; height: 16px; }
       }
+      /* ---- foldables half-open (iPhone Duo, Android foldables): the
+         Viewport Segments API reports one segment per half of the
+         screen, and env(viewport-segment-*) gives each half's box. Any
+         browser without it never matches these queries, so nothing
+         changes there. */
+      /* book pose — fold runs top to bottom: the gallery photo fills
+         the left page, its caption, colors and thumbnails the right
+         page, and the page tabs + colors move into the right half
+         instead of straddling the fold */
+      @media (horizontal-viewport-segments: 2) {
+        .bottom-ui {
+          left: env(viewport-segment-left 1 0, 50vw); right: 0;
+          flex-direction: column-reverse; align-items: center; gap: 10px;
+        }
+        .dock { width: calc(env(viewport-segment-width 1 0, 50vw) - 28px); max-width: 480px; padding: 8px; }
+        .dock a { flex-direction: column; gap: 3px; padding: 8px 4px 7px; font-size: 0.72rem; }
+        .dock a svg { width: 23px; height: 23px; }
+        .dock-thumb { top: 8px; bottom: 8px; }
+        .scheme-switch { padding: 4px; gap: 2px; }
+        .scheme-switch button { font-size: 0.78rem; padding: 6px 11px; gap: 6px; }
+        .scheme-switch .sw { width: 13px; height: 13px; }
+        body { padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+
+        .lightbox { padding: 0; }
+        .lightbox figure {
+          max-width: none; min-height: 100%; display: grid; align-content: center;
+          grid-template-columns:
+            env(viewport-segment-width 0 0, 50vw)
+            calc(env(viewport-segment-left 1 0, 50vw) - env(viewport-segment-right 0 0, 50vw))
+            env(viewport-segment-width 1 0, 50vw);
+        }
+        .lightbox figure > * { grid-column: 3; padding: 0 22px; }
+        .lightbox figure > .lb-stage { grid-column: 1; grid-row: 1 / span 5; align-self: center; padding: 0 58px; }
+        .lightbox img { max-height: 86vh; }
+        .lb-count { margin-top: 0; }
+        .lightbox figcaption { margin-top: 12px; }
+        .lb-close { right: 14px; }
+      }
+      /* laptop pose — fold runs side to side: photo on the top half,
+         caption and thumbnails on the bottom half */
+      @media (vertical-viewport-segments: 2) {
+        .lightbox { padding: 0; }
+        .lightbox figure {
+          max-width: none; display: grid;
+          grid-template-rows:
+            env(viewport-segment-height 0 0, 50vh)
+            calc(env(viewport-segment-top 0 1, 50vh) - env(viewport-segment-bottom 0 0, 50vh))
+            auto;
+        }
+        .lightbox figure > * { padding: 0 16px; }
+        .lightbox figure > .lb-stage { grid-row: 1; align-self: center; padding: 0 62px; }
+        .lightbox figure > .lb-count { grid-row: 3; margin-top: 12px; }
+        .lightbox figure > figcaption { grid-row: 4; }
+        .lightbox figure > .lb-meta { grid-row: 5; }
+        .lightbox figure > .lb-thumbs { grid-row: 6; padding-bottom: 24px; }
+        .lightbox img { max-height: calc(env(viewport-segment-height 0 0, 50vh) - 36px); }
+      }
     </style>
   </head>
   <body>
